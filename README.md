@@ -1,5 +1,7 @@
 # CowNav
 
+![](resources/cownav_logo.png) 
+
 ## Background
 
 An important task in robot navigation is **instance-image navigation (IIN)** — navigation to an image of a target at an unknown location. However, in real-world robotics tasks the external environment is quite uniform, and many targets share similar visual features; together these factors make IIN challenging.  
