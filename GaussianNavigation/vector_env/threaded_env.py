@@ -24,14 +24,19 @@ def _load_data(cfg_path: str):
     configs = []
     datasets = []
     basic_config = get_config(cfg_path)
+    print("cfg_path: ", cfg_path)
+    print("config: ", basic_config)
     NUM_ENVS = basic_config.end2end_imagenav.num_envs
     NUM_NODES = basic_config.end2end_imagenav.num_nodes
-    NUM_GPUS = basic_config.end2end_imagenav.num_gpus
+    NUM_GPUS = 1 #basic_config.end2end_imagenav.num_gpus #SG: patch, only 1 gpu in this environment
+    print("threads: ", NUM_ENVS, NUM_NODES, NUM_GPUS)
     num_processes = NUM_ENVS * NUM_NODES * NUM_GPUS
 
     with habitat.config.read_write(basic_config):
         split = basic_config.end2end_imagenav.split
         basic_config.habitat.dataset.split = split
+    print("dataset type: ", basic_config.habitat.dataset.type)
+    print("dataset path: ", basic_config.habitat.dataset)
     dataset = make_dataset(basic_config.habitat.dataset.type)
     scenes = basic_config.habitat.dataset.content_scenes
     if "*" in basic_config.habitat.dataset.content_scenes:
@@ -86,6 +91,7 @@ def _make_env_func(config, dataset=None, rank=0):
     """
     with habitat.config.read_write(config):
         config.habitat.simulator.scene = dataset.episodes[0].scene_id
+        print("successfuly read: ", config.habitat.simulator.scene)
     env_name = config.end2end_imagenav.env_name
     if env_name == 'instance_imagenav':
         from vector_env.envs.instance_imagenav_env import NiceEnv
@@ -97,6 +103,7 @@ def _make_env_func(config, dataset=None, rank=0):
 def _vec_env_fn(configs, datasets, multiprocessing_start_method='forkserver'):
 
     num_envs = len(configs)
+    print("num_envs: ", num_envs)
     envs = VectorEnv(
         make_env_fn=_make_env_func,
                 env_fn_args=tuple(
@@ -111,5 +118,7 @@ def _vec_env_fn(configs, datasets, multiprocessing_start_method='forkserver'):
 
 def construct_envs(cfg_path: str):
     configs, datasets = _load_data(cfg_path)
+    #print("configs: ", configs)
+    print("datasets: ", datasets)
     return _vec_env_fn(configs, datasets)
     

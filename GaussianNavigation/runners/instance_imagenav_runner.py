@@ -11,12 +11,13 @@ import logging
 
 class Runner():
 
-
-    def __init__(self, cfg_pth='configs/instance_imagenav.yaml'):
+    # don't remember, v0.2.3, config that shipped with GaussNav
+    def __init__(self, cfg_pth='configs/instance_imagenav.yaml'):#'configs/hm3d_v1.yaml'):#'configs/instance_imagenav_hm3d_v1.yaml'):#configs/instance_imagenav.yaml'):
 
         self._agent = None
         self.obs_transforms = []
         self._envs = construct_envs(cfg_pth)
+        print("completed construct_envs")
         self._config = get_config(cfg_pth)
         self.num_envs = self._config.end2end_imagenav.num_envs
         self.num_nodes = self._config.end2end_imagenav.num_nodes
@@ -49,6 +50,29 @@ class Runner():
 
     def train(self):
         self._envs.reset()
+        # ─── DEBUG: log every file-open attempt ─────────────────────────────────
+        """import builtins, os, traceback
+        _orig_open = builtins.open
+        def _debug_open(path, *args, **kwargs):
+            try:
+                exists = os.path.exists(path)
+            except Exception:
+                exists = "check_failed"
+            print(f"[DEBUG OPEN] path={path!r}, exists={exists}")
+            return _orig_open(path, *args, **kwargs)
+        builtins.open = _debug_open
+
+        # Wrap reset() so we see what went wrong, if anything
+        try:
+            print("[DEBUG] → calling envs.reset()")
+            self._envs.reset()
+            print("[DEBUG] ← reset() succeeded")
+        except Exception as e:
+            print(f"[ERROR] reset() failed: {e!r}")
+            traceback.print_exc()
+            raise"""
+
+        
         episodes_count = [0 for i in range(self.total_envs)]
         finished = [False for i in range(self.total_envs)]
         self.start_time = time.time()
@@ -75,6 +99,7 @@ class Runner():
                 spl = np.array([info[i]['spl'] for i in range(self.total_envs)])
                 dist = np.array([info[i]['distance_to_goal'] for i in range(self.total_envs)])
                 count = np.array([info[i]['episode_count'] for i in range(self.total_envs)])
+                #TODO: train on information metric (candidly, the author ran out of time to retrain the policy)
                 mean_success = np.sum(succ * count) / np.sum(count)
                 mean_spl = np.sum(spl * count) / np.sum(count)
                 mean_dist = np.sum(dist * count) / np.sum(count)

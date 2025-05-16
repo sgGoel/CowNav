@@ -43,12 +43,13 @@ habitat:
   dataset:
     split: val_mini
 
+#SG: num_gpus 2 --> 1
 end2end_imagenav:
   env_name: instance_imagenav 
   dump_location: "examples/"
   max_episodes: 500
   num_envs: 1
-  num_gpus: 2
+  num_gpus: 1
   num_nodes: 1
   split: val_mini
   node_id: 0

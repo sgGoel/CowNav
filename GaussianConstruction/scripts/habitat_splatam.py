@@ -26,17 +26,17 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 from datasets.gradslam_datasets import (
     load_dataset_config,
-    ICLDataset,
-    ReplicaDataset,
-    ReplicaV2Dataset,
-    AzureKinectDataset,
-    ScannetDataset,
-    Ai2thorDataset,
-    Record3DDataset,
-    RealsenseDataset,
-    TUMDataset,
-    ScannetPPDataset,
-    NeRFCaptureDataset,
+    #ICLDataset,
+    #ReplicaDataset,
+    #ReplicaV2Dataset,
+    #AzureKinectDataset,
+    #ScannetDataset,
+    #Ai2thorDataset,
+    #Record3DDataset,
+    #RealsenseDataset,
+    #TUMDataset,
+    #ScannetPPDataset,
+    #NeRFCaptureDataset,
     HabitatDataset
 )
 from utils.common_utils import seed_everything, save_params_ckpt, save_params
@@ -53,7 +53,7 @@ from diff_gaussian_rasterization import GaussianRasterizer as Renderer
 
 
 def get_dataset(config_dict, basedir, sequence, **kwargs):
-    if config_dict["dataset_name"].lower() in ["icl"]:
+    """if config_dict["dataset_name"].lower() in ["icl"]:
         return ICLDataset(config_dict, basedir, sequence, **kwargs)
     elif config_dict["dataset_name"].lower() in ["replica"]:
         return ReplicaDataset(config_dict, basedir, sequence, **kwargs)
@@ -74,8 +74,8 @@ def get_dataset(config_dict, basedir, sequence, **kwargs):
     elif config_dict["dataset_name"].lower() in ["scannetpp"]:
         return ScannetPPDataset(basedir, sequence, **kwargs)
     elif config_dict["dataset_name"].lower() in ["nerfcapture"]:
-        return NeRFCaptureDataset(basedir, sequence, **kwargs)
-    elif config_dict['dataset_name'].lower() in ["habitat"]:
+        return NeRFCaptureDataset(basedir, sequence, **kwargs)"""
+    if config_dict['dataset_name'].lower() in ["habitat"]: #SG: changed from elif
         return HabitatDataset(basedir, sequence, **kwargs)
     else:
         raise ValueError(f"Unknown dataset name {config_dict['dataset_name']}")

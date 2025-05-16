@@ -140,6 +140,7 @@ class VectorEnv:
         ), "number of environments to be created should be greater than 0"
 
         self._num_envs = len(env_fn_args)
+        print("num_envs2: ", self._num_envs)
 
         assert multiprocessing_start_method in self._valid_start_methods, (
             "multiprocessing_start_method must be one of {}. Got '{}'"
@@ -157,6 +158,7 @@ class VectorEnv:
         self._is_closed = False
 
         for write_fn in self._connection_write_fns:
+            print("OBSERVATION_SPACE_COMMAND: ", OBSERVATION_SPACE_COMMAND)
             write_fn((OBSERVATION_SPACE_COMMAND, None))
         self.observation_spaces = [
             read_fn() for read_fn in self._connection_read_fns
@@ -189,6 +191,16 @@ class VectorEnv:
         r"""process worker for creating and interacting with the environment.
         """
         env = env_fn(*env_fn_args)
+
+        # SG: DEBUG
+        """try:
+            env = env_fn(*env_fn_args)
+        except Exception as e:
+            # print full traceback of the real error to stderr
+            traceback.print_exc(file=sys.stderr)
+            # exit this worker process so parent gets a clean pipe-close
+            sys.exit(1)"""
+
         if parent_pipe is not None:
             parent_pipe.close()
         try:

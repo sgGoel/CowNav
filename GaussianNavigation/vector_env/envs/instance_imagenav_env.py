@@ -9,7 +9,7 @@ import skimage.morphology
 import habitat
 import cv2
 import magnum as mn
-import Quaternion
+import quaternion #SG: patch
 from tqdm import tqdm
 # from base_env import base_env
 from lightglue import LightGlue, SuperPoint, DISK
@@ -235,6 +235,12 @@ class NiceEnv(base_env):
 
     def compute_image_pair_similarity(self, obs1, obs2, resize_factors=4):
 
+        def ensure_rgb(img: np.ndarray) -> np.ndarray:
+            # rgba to rgb as needed
+            if img.ndim == 3 and img.shape[2] == 4:
+                return img[:, :, :3]
+            return img
+
         method = self.similarity_method
         # method = 3
 
@@ -265,22 +271,28 @@ class NiceEnv(base_env):
         elif method == 1:
             with torch.set_grad_enabled(False):
                 if isinstance(obs1, dict):
-                    ob = numpy_image_to_torch(obs1['rgb']).to(self.device)
-                    gi = numpy_image_to_torch(obs2['rgb']).to(self.device)
+                    ob = numpy_image_to_torch(ensure_rgb(obs1["rgb"])).to(self.device)
+                    gi = numpy_image_to_torch(ensure_rgb(obs2["rgb"])).to(self.device)
                 else:
-                    ob = numpy_image_to_torch(obs1).to(self.device)
-                    gi = numpy_image_to_torch(obs2).to(self.device)
+                    ob = numpy_image_to_torch(ensure_rgb(obs1)).to(self.device)
+                    gi = numpy_image_to_torch(ensure_rgb(obs2)).to(self.device)
                 try:
+                    #print("attempting a match")
+                    #print(ob.shape, ob.dtype, ob.min(), ob.max())
+                    #print(gi.shape, gi.dtype, gi.min(), gi.max())
                     feats0, feats1, matches01  = match_pair(self.extractor, self.matcher, ob, gi
                         )
                     # indices with shape (K, 2)
                     matches = matches01['matches']
                     # in case that the matches collapse make a check
                     if matches.shape[0] > 2048:
+                        print("matches collapsed")
                         similarity_score = 0
                     else:
+                        #print("sim score:", matches.shape[0])
                         similarity_score = matches.shape[0]
-                except:
+                except Exception as e:
+                    print("exception when matchin: ", e)
                     similarity_score = 0
 
         elif method == 2:
