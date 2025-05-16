@@ -6,3 +6,4 @@ data/
 GaussianNavigation/data/
 GaussianConstruction/data/
 *.npz
+CowNavExperiments/scratch.py
